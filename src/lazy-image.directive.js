@@ -104,9 +104,8 @@ angular.module('afkl.lazyImage')
                 var _setImage = function () {
                     if (options.background) {
                         element[0].style.backgroundImage = 'url("' + currentImage +'")';
-                    } else {
-                        img[0].src = currentImage;
                     }
+                    img[0].src = currentImage;
                 };
 
                 // Append image to DOM
@@ -118,12 +117,12 @@ angular.module('afkl.lazyImage')
 
                     if (currentImage) {
                         // we have to make an image if background is false (default)
-                        if (!options.background) {
-                            if (!img) {
-                                element.addClass(LOADING);
-                                img = angular.element('<img ' + alt + ' class="afkl-lazy-image" src=""/>');
-                                // remove loading class when image is acually loaded
-                                img.one('load', _loaded);
+                        if (!img) {
+                            element.addClass(LOADING);
+                            img = angular.element('<img ' + alt + ' class="afkl-lazy-image" src=""/>');
+                            // remove loading class when image is acually loaded
+                            img.one('load', _loaded);
+                            if (!options.background) {
                                 element.append(img);
                             }
                         }
@@ -215,19 +214,23 @@ angular.module('afkl.lazyImage')
 
                 // Set events for scrolling and resizing
                 $container.on('scroll', _onViewChange);
-                angular.element($window).on('resize', _onResize);
 
-                if ($container[0] !== $window) {
-                    $container.on('resize', _onResize);
+                if (options.observeResize) {
+                    angular.element($window).on('resize', _onResize);
+                    if ($container[0] !== $window) {
+                        $container.on('resize', _onResize);
+                    }
                 }
 
                 // events for image change
-                attrs.$observe('afklLazyImage', function () {
-                    images = attrs.afklLazyImage;
-                    if (loaded) {
-                        _placeImage();
-                    }
-                });
+                if (options.observeImageChange) {
+                    attrs.$observe('afklLazyImage', function () {
+                        images = attrs.afklLazyImage;
+                        if (loaded) {
+                            _placeImage();
+                        }
+                    });
+                }
 
                 // Image should be directly placed
                 if (options.nolazy) {
